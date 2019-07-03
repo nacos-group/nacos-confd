@@ -1,7 +1,5 @@
 package model
 
-import "time"
-
 /**
 *
 * @description :
@@ -106,8 +104,6 @@ type BeatInfo struct {
 	Cluster     string            `json:"cluster"`
 	Metadata    map[string]string `json:"metadata"`
 	Scheduled   bool              `json:"scheduled"`
-	Period      time.Duration     `json:"-"`
-	Stopped     bool              `json:"-"`
 }
 
 type ExpressionSelector struct {

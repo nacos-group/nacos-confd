@@ -13,7 +13,6 @@ import (
 	"math/rand"
 	"os"
 	"strings"
-	"time"
 )
 
 type NamingClient struct {
@@ -79,7 +78,6 @@ func (sc *NamingClient) RegisterInstance(param vo.RegisterInstanceParam) (bool, 
 		ServiceName: utils.GetGroupName(param.ServiceName, param.GroupName),
 		Cluster:     param.ClusterName,
 		Weight:      param.Weight,
-		Period:      utils.GetDurationWithDefault(param.Metadata, constant.HEART_BEAT_INTERVAL, time.Second*5),
 	}
 	_, err := sc.serviceProxy.RegisterInstance(utils.GetGroupName(param.ServiceName, param.GroupName), param.GroupName, instance)
 	if err != nil {

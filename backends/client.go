@@ -37,6 +37,8 @@ func New(config Config) (StoreClient, error) {
 
 	if config.Backend == "file" {
 		log.Info("Backend source(s) set to " + strings.Join(config.YAMLFile, ", "))
+	} else if config.Backend == "nacos" && len(config.Endpoint) > 0 {
+		log.Info("Backend source(s) set to " + config.Endpoint)
 	} else {
 		log.Info("Backend source(s) set to " + strings.Join(backendNodes, ", "))
 	}

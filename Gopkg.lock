@@ -287,8 +287,7 @@
   revision = "00c29f56e2386353d58c599509e8dc3801b0d716"
 
 [[projects]]
-  branch = "develop"
-  digest = "1:8f389b3a8395b864587dc299033c35b89fd65ae55a93bb488c2e70abd19638ef"
+  digest = "1:d9e82ab2c749d5b7f4fb6b5686d787a8047708898135a9150ea671752cf0f46b"
   name = "github.com/nacos-group/nacos-sdk-go"
   packages = [
     "clients",
@@ -302,13 +301,12 @@
     "common/nacos_error",
     "common/nacos_server",
     "common/util",
-    "example",
     "model",
     "utils",
     "vo",
   ]
   pruneopts = "UT"
-  revision = "dac5f46c0f201aff048a620381193ec1034aec90"
+  revision = "36af9aa0489b682df16ad3dc06f43ac84d60ec87"
 
 [[projects]]
   digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
@@ -519,9 +517,6 @@
     "github.com/nacos-group/nacos-sdk-go/clients",
     "github.com/nacos-group/nacos-sdk-go/clients/config_client",
     "github.com/nacos-group/nacos-sdk-go/common/constant",
-    "github.com/nacos-group/nacos-sdk-go/example",
-    "github.com/nacos-group/nacos-sdk-go/model",
-    "github.com/nacos-group/nacos-sdk-go/utils",
     "github.com/nacos-group/nacos-sdk-go/vo",
     "github.com/samuel/go-zookeeper/zk",
     "github.com/sirupsen/logrus",

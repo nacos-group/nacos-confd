@@ -44,7 +44,7 @@
 
 [[constraint]]
   name = "github.com/nacos-group/nacos-sdk-go"
-  branch = "develop"
+  revision = "36af9aa0489b682df16ad3dc06f43ac84d60ec87"
 
 [[constraint]]
   name = "gopkg.in/yaml.v2"
