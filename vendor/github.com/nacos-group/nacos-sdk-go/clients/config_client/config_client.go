@@ -11,6 +11,8 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/common/util"
 	"github.com/nacos-group/nacos-sdk-go/utils"
 	"github.com/nacos-group/nacos-sdk-go/vo"
+
+
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -19,10 +21,12 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/kms"
 )
 
 type ConfigClient struct {
 	nacos_client.INacosClient
+	kmsClient 	   *kms.Client
 	localConfigs   []vo.ConfigParam
 	mutex          sync.Mutex
 	configProxy    ConfigProxy
@@ -50,6 +54,14 @@ func NewConfigClient(nc nacos_client.INacosClient) (ConfigClient, error) {
 	}
 	config.configCacheDir = clientConfig.CacheDir + string(os.PathSeparator) + "config"
 	config.configProxy, err = NewConfigProxy(serverConfig, clientConfig, httpAgent)
+	if clientConfig.OpenKMS {
+		kmsClient,err := kms.NewClientWithAccessKey(clientConfig.RegionId, clientConfig.AccessKey, clientConfig.SecretKey)
+		if err != nil {
+			return config,err
+		}
+		config.kmsClient = kmsClient
+	}
+
 	return config, err
 }
 
@@ -75,6 +87,33 @@ func (client *ConfigClient) sync() (clientConfig constant.ClientConfig,
 }
 
 func (client *ConfigClient) GetConfig(param vo.ConfigParam) (content string, err error) {
+	content, err = client.getConfigInner(param)
+
+	if err != nil {
+		return "", err
+	}
+
+	return client.decrypt(param.DataId, content)
+}
+
+func (client *ConfigClient) decrypt(dataId, content string) (string, error) {
+	if strings.HasPrefix(dataId, "cipher-") && client.kmsClient != nil {
+		request := kms.CreateDecryptRequest()
+		request.Method = "POST"
+		request.Scheme = "https"
+		request.AcceptFormat = "json"
+		request.CiphertextBlob = content
+		response, err := client.kmsClient.Decrypt(request)
+		if err != nil {
+			return "", errors.New("ksm decrypt failed")
+		}
+		content = response.Plaintext
+	}
+
+	return content,nil
+}
+
+func (client *ConfigClient) getConfigInner(param vo.ConfigParam) (content string, err error) {
 	if len(param.DataId) <= 0 {
 		err = errors.New("[client.GetConfig] param.dataId can not be empty")
 	}
@@ -87,17 +126,26 @@ func (client *ConfigClient) GetConfig(param vo.ConfigParam) (content string, err
 
 	if err != nil {
 		log.Printf("[ERROR] get config from server error:%s ", err.Error())
+		if _, ok := err.(*nacos_error.NacosError); ok {
+			nacosErr := err.(*nacos_error.NacosError)
+			if nacosErr.ErrorCode() == "404" {
+				cache.WriteConfigToFile(cacheKey, client.configCacheDir, "")
+				return "", errors.New("config not found")
+			}
+			if nacosErr.ErrorCode() == "403" {
+				return "", errors.New("get config forbidden")
+			}
+		}
 		content, err = cache.ReadConfigFromFile(cacheKey, client.configCacheDir)
 		if err != nil {
 			log.Printf("[ERROR] get config from cache  error:%s ", err.Error())
 			return "", errors.New("read config from both server and cache fail")
 		}
-		return content, nil
+
 	} else {
 		cache.WriteConfigToFile(cacheKey, client.configCacheDir, content)
-		return content, nil
 	}
-
+	return content, nil
 }
 
 func (client *ConfigClient) PublishConfig(param vo.ConfigParam) (published bool,
@@ -204,7 +252,6 @@ func (client *ConfigClient) listenConfigTask(clientConfig constant.ClientConfig,
 			md5 + constant.SPLIT_CONFIG
 	}
 
-
 	client.mutex.Unlock()
 	// http 请求
 	params := make(map[string]string)
@@ -254,9 +301,7 @@ func listen(agent http_agent.IHttpAgent, path string,
 			if response.StatusCode == 200 {
 				changed = string(bytes)
 			} else {
-				err = &nacos_error.NacosError{
-					ErrMsg: "[" + strconv.Itoa(response.StatusCode) + "]" + string(bytes),
-				}
+				err = nacos_error.NewNacosError(strconv.Itoa(response.StatusCode), string(bytes), nil)
 			}
 		}
 	}
@@ -270,7 +315,7 @@ func (client *ConfigClient) updateLocalConfig(changed string, param vo.ConfigPar
 	for _, config := range changedConfigs {
 		attrs := strings.Split(config, "%02")
 		if len(attrs) == 2 {
-			content, err := client.GetConfig(vo.ConfigParam{
+			content, err := client.getConfigInner(vo.ConfigParam{
 				DataId: attrs[0],
 				Group:  attrs[1],
 			})
@@ -284,11 +329,12 @@ func (client *ConfigClient) updateLocalConfig(changed string, param vo.ConfigPar
 				})
 
 				// call listener:
-				param.OnChange("", attrs[1], attrs[0], content)
+				decrept, _ := client.decrypt(attrs[0], content)
+				param.OnChange("", attrs[1], attrs[0], decrept)
 
 			}
 		} else if len(attrs) == 3 {
-			content, err := client.GetConfig(vo.ConfigParam{
+			content, err := client.getConfigInner(vo.ConfigParam{
 				DataId: attrs[0],
 				Group:  attrs[1],
 			})
@@ -302,7 +348,8 @@ func (client *ConfigClient) updateLocalConfig(changed string, param vo.ConfigPar
 				})
 
 				// call listener:
-				param.OnChange(attrs[2], attrs[1], attrs[0], content)
+				decrept, _ := client.decrypt(attrs[0], content)
+				param.OnChange(attrs[2], attrs[1], attrs[0], decrept)
 			}
 		}
 	}
