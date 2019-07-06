@@ -44,7 +44,7 @@
 
 [[constraint]]
   name = "github.com/nacos-group/nacos-sdk-go"
-  revision = "36af9aa0489b682df16ad3dc06f43ac84d60ec87"
+  revision = "4dd8d9c71ef131e22e9182f0094e4cfa2f677b23"
 
 [[constraint]]
   name = "gopkg.in/yaml.v2"

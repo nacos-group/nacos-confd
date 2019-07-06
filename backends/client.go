@@ -95,6 +95,8 @@ func New(config Config) (StoreClient, error) {
 					AccessKey: 		config.AccessKey,
 					SecretKey: 		config.SecretKey,
 					Endpoint:  		config.Endpoint,
+					OpenKMS:		config.OpenKMS,
+					RegionId: 	    config.RegionId,
 				})
 	}
 	return nil, errors.New("Invalid backend")

@@ -31,5 +31,7 @@ type Config struct {
 	Namespace    string 	`toml:"namespace"`
 	AccessKey    string 	`toml:"accessKey"`
 	SecretKey    string 	`toml:"secretKey"`
+	OpenKMS      bool       `toml:"openKMS"`
+	RegionId     string     `toml:"regionId"`
 	Role         string
 }

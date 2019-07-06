@@ -74,10 +74,12 @@ func init() {
 	flag.StringVar(&config.Username, "username", "", "the username to authenticate as (only used with vault and etcd backends)")
 	flag.StringVar(&config.Password, "password", "", "the password to authenticate with (only used with vault and etcd backends)")
 	flag.StringVar(&config.Endpoint, "endpoint", "", "the endpoint in nacos (only used with nacos backends)")
-	flag.StringVar(&config.Group, "group", "", "the group in nacos (only used with nacos backends)")
+	flag.StringVar(&config.Group, "group", "DEFAULT_GROUP", "the group in nacos (only used with nacos backends)")
 	flag.StringVar(&config.Namespace, "namespace", "", "the namespace in nacos (only used with nacos backends)")
 	flag.StringVar(&config.AccessKey, "accessKey", "", "the accessKey to authenticate in nacos (only used with nacos backends)")
 	flag.StringVar(&config.SecretKey, "secretKey", "", "the secretKey to authenticate in nacos (only used with nacos backends)")
+	flag.BoolVar(&config.OpenKMS, "openKMS", false, "the switch if open kms in nacos (only used with nacos backends)")
+	flag.StringVar(&config.RegionId, "regionId", "", "the kms regionId in nacos (only used with nacos backends)")
 	flag.BoolVar(&config.Watch, "watch", false, "enable watch support")
 }
 
