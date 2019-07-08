@@ -16,6 +16,8 @@ import (
 	"github.com/kelseyhightower/confd/backends/vault"
 	"github.com/kelseyhightower/confd/backends/zookeeper"
 	"github.com/kelseyhightower/confd/log"
+	"github.com/kelseyhightower/confd/backends/nacos"
+	"github.com/nacos-group/nacos-sdk-go/common/constant"
 )
 
 // The StoreClient interface is implemented by objects that can retrieve
@@ -35,6 +37,8 @@ func New(config Config) (StoreClient, error) {
 
 	if config.Backend == "file" {
 		log.Info("Backend source(s) set to " + strings.Join(config.YAMLFile, ", "))
+	} else if config.Backend == "nacos" && len(config.Endpoint) > 0 {
+		log.Info("Backend source(s) set to " + config.Endpoint)
 	} else {
 		log.Info("Backend source(s) set to " + strings.Join(backendNodes, ", "))
 	}
@@ -85,6 +89,15 @@ func New(config Config) (StoreClient, error) {
 		return dynamodb.NewDynamoDBClient(table)
 	case "ssm":
 		return ssm.New()
+	case "nacos":
+		return nacos.NewNacosClient(backendNodes, config.Group, constant.ClientConfig{
+					NamespaceId: 	config.Namespace,
+					AccessKey: 		config.AccessKey,
+					SecretKey: 		config.SecretKey,
+					Endpoint:  		config.Endpoint,
+					OpenKMS:		config.OpenKMS,
+					RegionId: 	    config.RegionId,
+				})
 	}
 	return nil, errors.New("Invalid backend")
 }

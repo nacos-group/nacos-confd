@@ -12,7 +12,7 @@ type Config struct {
 	ClientCaKeys string     `toml:"client_cakeys"`
 	ClientCert   string     `toml:"client_cert"`
 	ClientKey    string     `toml:"client_key"`
-        ClientInsecure bool     `toml:"client_insecure"`
+	ClientInsecure bool     `toml:"client_insecure"`
 	BackendNodes util.Nodes `toml:"nodes"`
 	Password     string     `toml:"password"`
 	Scheme       string     `toml:"scheme"`
@@ -26,5 +26,12 @@ type Config struct {
 	YAMLFile     util.Nodes `toml:"file"`
 	Filter       string     `toml:"filter"`
 	Path         string     `toml:"path"`
+	Group		 string 	`toml:"group"`
+	Endpoint	 string 	`toml:"endpoint"`
+	Namespace    string 	`toml:"namespace"`
+	AccessKey    string 	`toml:"accessKey"`
+	SecretKey    string 	`toml:"secretKey"`
+	OpenKMS      bool       `toml:"openKMS"`
+	RegionId     string     `toml:"regionId"`
 	Role         string
 }
