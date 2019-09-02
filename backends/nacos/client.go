@@ -26,6 +26,7 @@ type Client struct {
 	accessKey string
 	secretKey string
 	channel chan int
+	count int
 }
 
 func NewNacosClient(nodes []string, group string, config constant.ClientConfig) (client *Client, err error) {
@@ -76,7 +77,7 @@ func NewNacosClient(nodes []string, group string, config constant.ClientConfig) 
 		},
 	})
 
-	client = &Client{configClient, namingClient, group, config.NamespaceId, config.AccessKey, config.SecretKey, make(chan int, 10)}
+	client = &Client{configClient, namingClient, group, config.NamespaceId, config.AccessKey, config.SecretKey, make(chan int, 10), 0}
 
 	return
 }
@@ -118,6 +119,7 @@ func (client *Client) GetValues(keys []string) (map[string]string, error) {
 func (client *Client) WatchPrefix(prefix string, keys []string, waitIndex uint64, stopChan chan bool) (uint64, error) {
 	// return something > 0 to trigger a key retrieval from the store
 	if waitIndex == 0 {
+		client.count++
 		for _, key := range keys {
 			k := strings.TrimPrefix(key, "/")
 			k = replacer.Replace(k)
@@ -128,7 +130,9 @@ func (client *Client) WatchPrefix(prefix string, keys []string, waitIndex uint64
 					GroupName:   client.group,
 					SubscribeCallback: func(services []model.SubscribeService, err error) {
 						log.Info(fmt.Sprintf("\n\n callback return services:%s \n\n", utils.ToJsonString(services)))
-						client.channel <- 1
+						for i := 0; i < client.count; i++ {
+        					client.channel <- 1	
+    					}
 					},
 				})
 			} else {
@@ -137,7 +141,9 @@ func (client *Client) WatchPrefix(prefix string, keys []string, waitIndex uint64
 					Group: client.group,
 					OnChange: func(namespace, group, dataId, data string) {
 						log.Info(fmt.Sprintf("config namespace=%s, dataId=%s, group=%s has changed", namespace, dataId, group))
-						client.channel <- 1
+						for i := 0; i < client.count; i++ {
+        					client.channel <- 1	
+    					}
 					},
 				})
 
