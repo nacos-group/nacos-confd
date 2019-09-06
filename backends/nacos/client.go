@@ -52,8 +52,8 @@ func NewNacosClient(nodes []string, group string, config constant.ClientConfig) 
 	configClient, err = clients.CreateConfigClient(map[string]interface{}{
 		"serverConfigs": servers,
 		"clientConfig": constant.ClientConfig{
-			TimeoutMs:           20000,
-			ListenInterval:      10000,
+			TimeoutMs:           10000,
+			ListenInterval:      20000,
 			NotLoadCacheAtStart: true,
 			NamespaceId:	     config.NamespaceId,
 			AccessKey: 			 config.AccessKey,
@@ -67,8 +67,8 @@ func NewNacosClient(nodes []string, group string, config constant.ClientConfig) 
 	namingClient, _ := clients.CreateNamingClient(map[string]interface{}{
 		"serverConfigs": servers,
 		"clientConfig": constant.ClientConfig{
-			TimeoutMs:           20000,
-			ListenInterval:      10000,
+			TimeoutMs:           10000,
+			ListenInterval:      20000,
 			NotLoadCacheAtStart: true,
 			NamespaceId:	     config.NamespaceId,
 			AccessKey: 			 config.AccessKey,

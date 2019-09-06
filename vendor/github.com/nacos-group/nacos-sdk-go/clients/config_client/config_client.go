@@ -12,7 +12,7 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/utils"
 	"github.com/nacos-group/nacos-sdk-go/vo"
 
-
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/kms"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -21,12 +21,11 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/kms"
 )
 
 type ConfigClient struct {
 	nacos_client.INacosClient
-	kmsClient 	   *kms.Client
+	kmsClient      *kms.Client
 	localConfigs   []vo.ConfigParam
 	mutex          sync.Mutex
 	configProxy    ConfigProxy
@@ -55,9 +54,9 @@ func NewConfigClient(nc nacos_client.INacosClient) (ConfigClient, error) {
 	config.configCacheDir = clientConfig.CacheDir + string(os.PathSeparator) + "config"
 	config.configProxy, err = NewConfigProxy(serverConfig, clientConfig, httpAgent)
 	if clientConfig.OpenKMS {
-		kmsClient,err := kms.NewClientWithAccessKey(clientConfig.RegionId, clientConfig.AccessKey, clientConfig.SecretKey)
+		kmsClient, err := kms.NewClientWithAccessKey(clientConfig.RegionId, clientConfig.AccessKey, clientConfig.SecretKey)
 		if err != nil {
-			return config,err
+			return config, err
 		}
 		config.kmsClient = kmsClient
 	}
@@ -110,7 +109,7 @@ func (client *ConfigClient) decrypt(dataId, content string) (string, error) {
 		content = response.Plaintext
 	}
 
-	return content,nil
+	return content, nil
 }
 
 func (client *ConfigClient) getConfigInner(param vo.ConfigParam) (content string, err error) {
